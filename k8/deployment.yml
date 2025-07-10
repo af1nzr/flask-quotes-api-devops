@@ -49,4 +49,4 @@ spec:
           failureThreshold: 3
       restartPolicy: Always
       imagePullSecrets:
-      - name: my-registry-secret
+      - name: ghcr-creds

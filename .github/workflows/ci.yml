@@ -47,7 +47,8 @@ jobs:
     - name: Set up Kubeconfig
       run: |
         mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+      
 
     - name: Create imagePullSecret in Kubernetes (if not exists)
       run: |
@@ -55,7 +56,7 @@ jobs:
           --docker-server=ghcr.io \
           --docker-username=${{ secrets.GITHUBUSERNAME }} \
           --docker-password=${{ secrets.GITHUBTOKEN }} \
-          --docker-email=none@example.com \
+          --docker-email=af1ncn07@gmail.com \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Deploy to Kubernetes
