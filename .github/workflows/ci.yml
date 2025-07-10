@@ -44,8 +44,9 @@ jobs:
       run: |
         docker push ghcr.io/af1nzr/flask-quotes-api:latest
         
-    - name: Set up Kubeconfig
+    - name: Set up kubeconfig
       run: |
+        mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
 
 
