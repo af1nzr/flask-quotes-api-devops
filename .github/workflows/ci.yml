@@ -49,18 +49,3 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
 
-
-    - name: Create imagePullSecret in Kubernetes (if not exists)
-      run: |
-        kubectl create secret docker-registry my-registry-secret \
-          --docker-server=ghcr.io \
-          --docker-username=${{ secrets.GITHUBUSERNAME }} \
-          --docker-password=${{ secrets.GITHUBTOKEN }} \
-          --docker-email=af1ncn07@gmail.com \
-          --dry-run=client -o yaml | kubectl apply -f -
-
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
-        kubectl rollout status deployment/flask-quotes-api-deployment
