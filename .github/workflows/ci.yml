@@ -46,8 +46,8 @@ jobs:
         
     - name: Set up Kubeconfig
       run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
+
 
     - name: Create imagePullSecret in Kubernetes (if not exists)
       run: |
