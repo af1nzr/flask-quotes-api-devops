@@ -43,12 +43,11 @@ jobs:
     - name: Push Docker image
       run: |
         docker push ghcr.io/af1nzr/flask-quotes-api:latest
-
+        
     - name: Set up Kubeconfig
       run: |
         mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-      
+        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
     - name: Create imagePullSecret in Kubernetes (if not exists)
       run: |
