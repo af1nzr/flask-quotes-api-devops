@@ -1,0 +1,65 @@
+name: python-flask-quotes-api-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GITHUBUSERNAME }}
+        password: ${{ secrets.GITHUBTOKEN }}
+
+    - name: Build Docker image
+      run: |
+        docker build -t ghcr.io/af1nzr/flask-quotes-api:latest .
+
+    - name: Push Docker image
+      run: |
+        docker push ghcr.io/af1nzr/flask-quotes-api:latest
+
+    - name: Set up Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+
+    - name: Create imagePullSecret in Kubernetes (if not exists)
+      run: |
+        kubectl create secret docker-registry my-registry-secret \
+          --docker-server=ghcr.io \
+          --docker-username=${{ secrets.GITHUBUSERNAME }} \
+          --docker-password=${{ secrets.GITHUBTOKEN }} \
+          --docker-email=none@example.com \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+        kubectl rollout status deployment/flask-quotes-api-deployment

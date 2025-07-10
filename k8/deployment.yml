@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-quotes-api-deployment
+  labels:
+    app: flask-quotes-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: flask-quotes-api
+  template:
+    metadata:
+      labels:
+        app: flask-quotes-api
+    spec:
+      containers:
+      - name: flask-quotes-api
+        image: ghcr.io/af1nzr/flask-quotes-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: my-registry-secret
